@@ -1,0 +1,13 @@
+name: manticore-search
+version: 0.1.0
+
+authors:
+  - Ao Yu <1511292939@qq.com>
+
+targets:
+  manticore-search:
+    main: src/manticore-search.cr
+
+crystal: '>= 1.13.1'
+
+license: MIT
