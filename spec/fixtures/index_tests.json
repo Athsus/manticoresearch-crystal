@@ -1,0 +1,19 @@
+{
+    "insert": {
+      "request": {"index": "test", "id": 1, "doc": {"content": "sample content", "name": "test doc", "cat": "10"}},
+      "expected_response": {"created": true, "found": null, "id": 1, "index": "test", "result": "created"}
+    },
+    "delete": {
+      "request": {"index": "test", "id": 1},
+      "expected_response": {"deleted": null, "id": 1, "index": "test", "result": "deleted"}
+    },
+    "replace": {
+      "request": {"index": "test", "id": 1, "doc": {"content": "updated content", "cat": 11}},
+      "expected_response": {"created": false, "found": null, "id": 1, "index": "test", "result": "updated"}
+    },
+    "update": {
+      "request": {"index": "test", "id": 1, "doc": {"cat": 12}},
+      "expected_response": {"id": 1, "index": "test", "result": "updated", "updated": null}
+    }
+  }
+  
