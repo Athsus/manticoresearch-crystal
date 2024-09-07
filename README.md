@@ -79,14 +79,6 @@ All URIs are relative to `http://127.0.0.1:9308`.
 | **SearchApi** | `search`  | **POST** `/search`          | Performs a search on an index                    |
 | **UtilsApi** | `sql`      | **POST** `/sql`             | Perform SQL queries                              |
 
-### API Models
-
-- `BulkResponse`
-- `SearchRequest`
-- `SearchResponse`
-- `DeleteResponse`
-- `InsertDocumentRequest`
-- `UpdateDocumentRequest`
 
 For full API reference, please refer to the [Manticore Search Documentation](https://manual.manticoresearch.com).
 
