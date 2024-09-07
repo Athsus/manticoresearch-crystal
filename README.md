@@ -24,4 +24,4 @@ TODO: Write development instructions here
 
 ## Contributors
 
-- [Ao Yu](https://github.com/your-github-user) - creator and maintainer
+- [Ao Yu](https://github.com/Athsus) - creator and maintainer
