@@ -1,13 +1,34 @@
-name: manticore-search
+name: debug
 version: 0.1.0
 
 authors:
   - Ao Yu <1511292939@qq.com>
 
 targets:
-  manticore-search:
-    main: src/manticore-search.cr
+  test:
+    main: test.cr
+  utils_api_sql:
+    main: examples/utils_api_sql.cr
+  search_api_search:
+    main: examples/search_api_search.cr
+  search_api_percolate:
+    main: examples/search_api_percolate.cr
+  index_api_bulk:
+    main: examples/index_api_bulk.cr
+  index_api_delete:
+    main: examples/index_api_delete.cr
+  index_api_insert:
+    main: examples/index_api_insert.cr
+  index_api_replace:
+    main: examples/index_api_replace.cr
+  index_api_update:
+    main: examples/index_api_update.cr
+
 
 crystal: '>= 1.13.1'
 
 license: MIT
+
+dependencies:
+  spectator:
+    github: icy-arctic-fox/spectator
