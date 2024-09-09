@@ -24,11 +24,9 @@ targets:
   index_api_update:
     main: examples/index_api_update.cr
 
+  utils_api_spec:
+    main: spec/utils_api_spec.cr
 
 crystal: '>= 1.13.1'
 
 license: MIT
-
-dependencies:
-  spectator:
-    github: icy-arctic-fox/spectator
