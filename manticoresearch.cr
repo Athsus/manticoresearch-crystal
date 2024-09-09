@@ -1,2 +1,2 @@
 
-require ".src/manticoresearch"
+require "./src/manticoresearch"
