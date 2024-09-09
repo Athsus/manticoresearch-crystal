@@ -3,3 +3,6 @@
 /bin/
 /.shards/
 *.dwarf
+test.cr
+/.idea
+/.vscode
