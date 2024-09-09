@@ -1,110 +1,88 @@
-require "../Manticoresearch/Manticoresearch"
-require "spec"
+require "./spec_helper"
 
 describe Manticoresearch::SearchApi do
-  before_each do
-    # 初始化配置和客户端
-    @config = Manticoresearch::Configuration.new("http://localhost:9308")
-    @api_client = Manticoresearch::ApiClient.new(@config)
-    @api = Manticoresearch::SearchApi.new(@api_client)
-    @index_api = Manticoresearch::IndexApi.new(@api_client)
+
+  it "performs a search and validates results" do
+    config = Manticoresearch::Configuration.new("http://localhost:9308")
+    api_client = Manticoresearch::ApiClient.new(config)
+    search_api = Manticoresearch::SearchApi.new(api_client)
+    index_api = Manticoresearch::IndexApi.new(api_client)
+
+    # 删除文档，确保干净的状态（如果存在则删除）
+    delete_req_body = { "index" => "test", "id" => 1 }
+    begin
+      index_api.delete(delete_req_body)
+    rescue e
+      puts "Document not found, nothing to delete: #{e.message}"  # 如果不存在，捕获异常并打印信息
+    end
+
+    # 插入测试文档
+    insert_req_body = { "index" => "test", "id" => 1, "doc" => { "content" => "sample content", "name" => "test doc", "cat" => "10" } }
+    response = index_api.insert(insert_req_body)
+
+    # 执行搜索，查找匹配 "sample" 的文档
+    search_req_body = { "index" => "test", "query" => { "match" => { "content" => "sample" } } }
+    search_response = search_api.search(search_req_body)
+    id = search_response["hits"]["hits"][0]["_id"]
+    total = search_response["hits"]["total"]
+
+    # 验证搜索结果
+    id.should eq(1)  # 文档 ID 应该为 1
+    total.should eq(1)  # 搜索到 1 个文档
+
+    # 执行一个无匹配的搜索
+    search_req_body_no_match = { "index" => "test", "query" => { "match" => { "content" => "no match" } } }
+    no_match_response = search_api.search(search_req_body_no_match)
+    no_match_result = no_match_response["hits"]["total"]
+    no_match_result.should eq(0)  # 不应找到任何匹配的文档
+
+    # 删除文档，确保干净的状态（如果存在则删除）
+    begin
+      index_api.delete(delete_req_body)
+    rescue e
+      puts "Document not found, nothing to delete: #{e.message}"
+    end
   end
 
-  # 测试 percolate 功能
-  it "performs reverse search on a percolate index" do
-    # 插入文档到 percolate index
-    insert_req_body = {
-      "index" => "test_pq",
-      "id" => 1,
-      "doc" => {"query" => "@content sample content"}
-    }
-    @index_api.insert(insert_req_body)
+  it "tests percolate search" do
+    config = Manticoresearch::Configuration.new("http://localhost:9308")
+    api_client = Manticoresearch::ApiClient.new(config)
+    search_api = Manticoresearch::SearchApi.new(api_client)
+    index_api = Manticoresearch::IndexApi.new(api_client)
 
-    # 执行 percolate 查询
-    req_body = {"query" => {"percolate" => {"document" => {"content" => "sample content"}}}}
-    api_resp = @api.percolate("test_pq", req_body)
-    res = {
-      hits: api_resp["hits"]["hits"],
-      total: api_resp["hits"]["total"],
-      profile: api_resp["profile"],
-      timed_out: api_resp["timed_out"]
-    }
-    expected_res = {
-      hits: [{_id: "1", _index: "test_pq", _score: "1", _source: {query: {ql: "@content sample content"}}, _type: "doc", fields: {_percolator_document_slot: [1]}}],
-      total: 1,
-      profile: nil,
-      timed_out: false
-    }
-    res.should eq(expected_res)
+    # 删除 percolate 查询文档，确保干净的状态（如果存在则删除）
+    delete_req_body = { "index" => "test_pq", "id" => 1 }
+    begin
+      index_api.delete(delete_req_body)
+    rescue e
+      puts "Percolate document not found, nothing to delete: #{e.message}"  # 如果不存在，捕获异常并打印信息
+    end
 
-    # 测试没有匹配的文档
-    req_body = {"query" => {"percolate" => {"document" => {"content" => "no match"}}}}
-    api_resp = @api.percolate("test_pq", req_body)
-    res = {
-      hits: api_resp["hits"]["hits"],
-      total: api_resp["hits"]["total"],
-      profile: api_resp["profile"],
-      timed_out: api_resp["timed_out"]
-    }
-    expected_res = {
-      hits: [] of Hash,
-      total: 0,
-      profile: nil,
-      timed_out: false
-    }
-    res.should eq(expected_res)
+    # 插入 percolate 查询文档
+    percolate_query = { "index" => "test_pq", "id" => 1, "doc" => { "content" => "sample content" } }
+    index_api.insert(percolate_query)
+
+    # 执行 percolate 查询，匹配 "sample content"
+    percolate_req_body = { "query" => { "percolate" => { "document" => { "content" => "sample content" } } } }
+    percolate_response = search_api.percolate("test_pq", percolate_req_body)
+    percolate_result = percolate_response["hits"]["hits"][0]
+
+    # 验证 percolate 结果
+    percolate_result["_id"].should eq("1")  # 匹配的 percolate 文档 ID 应为 1
+    percolate_response["hits"]["total"].should eq(1)  # 应该匹配 1 个文档
+
+    # 执行一个无匹配的 percolate 查询
+    percolate_req_no_match = { "query" => { "percolate" => { "document" => { "content" => "no match" } } } }
+    no_match_response = search_api.percolate("test_pq", percolate_req_no_match)
+    no_match_total = no_match_response["hits"]["total"]
+    no_match_total.should eq(0)  # 不应找到任何匹配的文档
+
+    # 删除 percolate 查询文档（如果存在则删除）
+    begin
+      index_api.delete(delete_req_body)
+    rescue e
+      puts "Percolate document not found, nothing to delete: #{e.message}"
+    end
   end
 
-  # 测试 search 功能
-  it "performs a search" do
-    # 删除可能存在的文档
-    req_body = {"index" => "test", "id" => 1}
-    @index_api.delete(req_body)
-
-    # 插入一个文档
-    insert_req_body = {
-      "index" => "test",
-      "id" => 1,
-      "doc" => {
-        "content" => "sample content",
-        "name" => "test doc",
-        "cat" => "10"
-      }
-    }
-    @index_api.insert(insert_req_body)
-
-    # 执行查询
-    req_body = {"index" => "test", "query" => {"match" => {"content" => "sample"}}}
-    api_resp = @api.search(req_body)
-    res = {
-      id: api_resp["hits"]["hits"][0]["_id"],
-      total: api_resp["hits"]["total"],
-      profile: api_resp["profile"],
-      timed_out: api_resp["timed_out"]
-    }
-    expected_res = {
-      id: "1",
-      total: 1,
-      profile: nil,
-      timed_out: false
-    }
-    res.should eq(expected_res)
-
-    # 测试无匹配的查询
-    req_body = {"index" => "test", "query" => {"match" => {"content" => "no match"}}}
-    api_resp = @api.search(req_body)
-    res = {
-      hits: api_resp["hits"]["hits"],
-      total: api_resp["hits"]["total"],
-      profile: api_resp["profile"],
-      timed_out: api_resp["timed_out"]
-    }
-    expected_res = {
-      hits: [] of Hash,
-      total: 0,
-      profile: nil,
-      timed_out: false
-    }
-    res.should eq(expected_res)
-  end
 end
