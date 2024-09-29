@@ -14,7 +14,7 @@ To add the `manticoresearch` package to your Crystal project, add the following 
 dependencies:
   manticoresearch:
     github: Athsus/manticoresearch-crystal
-    version: ~> 1.0.0
+    version: ~> 1.0.2
 ```
 Then run ```shards install``` to install dependencies
 
