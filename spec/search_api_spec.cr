@@ -1,12 +1,14 @@
 require "./spec_helper"
 
 describe Manticoresearch::SearchApi do
+  config = Manticoresearch::Configuration.new("http://localhost:9308")
+  api_client = Manticoresearch::ApiClient.new(config)
+  utils_api = Manticoresearch::UtilsApi.new(api_client)
+  search_api = Manticoresearch::SearchApi.new(api_client)
+  index_api = Manticoresearch::IndexApi.new(api_client)
 
   it "performs a search and validates results" do
-    config = Manticoresearch::Configuration.new("http://localhost:9308")
-    api_client = Manticoresearch::ApiClient.new(config)
-    search_api = Manticoresearch::SearchApi.new(api_client)
-    index_api = Manticoresearch::IndexApi.new(api_client)
+    
 
     # 删除文档，确保干净的状态（如果存在则删除）
     delete_req_body = { "index" => "test", "id" => 1 }
@@ -45,30 +47,23 @@ describe Manticoresearch::SearchApi do
   end
 
   it "tests percolate search" do
-    config = Manticoresearch::Configuration.new("http://localhost:9308")
-    api_client = Manticoresearch::ApiClient.new(config)
-    search_api = Manticoresearch::SearchApi.new(api_client)
-    index_api = Manticoresearch::IndexApi.new(api_client)
 
-    # 删除 percolate 查询文档，确保干净的状态（如果存在则删除）
-    delete_req_body = { "index" => "test_pq", "id" => 1 }
-    begin
-      index_api.delete(delete_req_body)
-    rescue e
-      puts "Percolate document not found, nothing to delete: #{e.message}"  # 如果不存在，捕获异常并打印信息
-    end
-
+    utils_api.sql("drop table if exists test_pq")
+    utils_api.sql("create table test_pq(title text, color string) type=\'pq\'")
+    
     # 插入 percolate 查询文档
-    percolate_query = { "index" => "test_pq", "id" => 1, "doc" => { "content" => "sample content" } }
+    percolate_query = { "index" => "test_pq", "doc" => { "query" => "@title bag" } }
+    index_api.insert(percolate_query)
+
+    percolate_query = { "index" => "test_pq", "doc" => { "query" => "@title shoes", "filters"=> "color=\'red\'" } }
     index_api.insert(percolate_query)
 
     # 执行 percolate 查询，匹配 "sample content"
-    percolate_req_body = { "query" => { "percolate" => { "document" => { "content" => "sample content" } } } }
+    percolate_req_body = { "query" => { "percolate" => { "document" => { "title" => "what a nice bag" } } } }
     percolate_response = search_api.percolate("test_pq", percolate_req_body)
     percolate_result = percolate_response["hits"]["hits"][0]
 
     # 验证 percolate 结果
-    percolate_result["_id"].should eq("1")  # 匹配的 percolate 文档 ID 应为 1
     percolate_response["hits"]["total"].should eq(1)  # 应该匹配 1 个文档
 
     # 执行一个无匹配的 percolate 查询
@@ -77,12 +72,7 @@ describe Manticoresearch::SearchApi do
     no_match_total = no_match_response["hits"]["total"]
     no_match_total.should eq(0)  # 不应找到任何匹配的文档
 
-    # 删除 percolate 查询文档（如果存在则删除）
-    begin
-      index_api.delete(delete_req_body)
-    rescue e
-      puts "Percolate document not found, nothing to delete: #{e.message}"
-    end
+    utils_api.sql("drop table if exists test_pq")
   end
 
 end

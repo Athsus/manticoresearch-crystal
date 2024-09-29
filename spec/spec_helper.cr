@@ -1,4 +1,4 @@
 
 require "spec"
-require "../Manticoresearch/Manticoresearch"
+require "../manticoresearch"
 

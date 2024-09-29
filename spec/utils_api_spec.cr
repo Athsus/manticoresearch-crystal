@@ -1,12 +1,13 @@
 require "./spec_helper"
 
 describe Manticoresearch::UtilsApi do
+  config = Manticoresearch::Configuration.new("http://localhost:9308")
+  api_client = Manticoresearch::ApiClient.new(config)
+  utils_api = Manticoresearch::UtilsApi.new(api_client)
+  search_api = Manticoresearch::SearchApi.new(api_client)
+  index_api = Manticoresearch::IndexApi.new(api_client)
 
   it "creates test table and verifies it exists" do
-    config = Manticoresearch::Configuration.new("http://localhost:9308")
-    api_client = Manticoresearch::ApiClient.new(config)
-    utils_api = Manticoresearch::UtilsApi.new(api_client)
-
     utils_api.sql("DROP TABLE IF EXISTS movies")
   
     # 创建表的 SQL 语句
@@ -36,10 +37,6 @@ describe Manticoresearch::UtilsApi do
   
 
   it "inserts data into movies" do
-    config = Manticoresearch::Configuration.new("http://localhost:9308")
-    api_client = Manticoresearch::ApiClient.new(config)
-    utils_api = Manticoresearch::UtilsApi.new(api_client)
-
     # 构建 SQL 插入数据的语句
     sql_queries = [
       "INSERT INTO movies (id, title, plot, _year, rating, cat) VALUES (1, 'Star Trek 2: Nemesis', 'The Enterprise is diverted to the Romulan homeworld Romulus...', 2002, 6.4, 'R')",
@@ -56,9 +53,6 @@ describe Manticoresearch::UtilsApi do
   end
 
   it "selects data from movies" do
-    config = Manticoresearch::Configuration.new("http://localhost:9308")
-    api_client = Manticoresearch::ApiClient.new(config)
-    utils_api = Manticoresearch::UtilsApi.new(api_client)
 
     sql_query = "SELECT * FROM movies WHERE id = 1"
     response = utils_api.sql(sql_query, raw_response: true)
@@ -69,9 +63,6 @@ describe Manticoresearch::UtilsApi do
   end
 
   it "performs complex queries" do
-    config = Manticoresearch::Configuration.new("http://localhost:9308")
-    api_client = Manticoresearch::ApiClient.new(config)
-    utils_api = Manticoresearch::UtilsApi.new(api_client)
 
     sql_query = <<-SQL
       SELECT title, AVG(rating) as avg_rating 
@@ -85,9 +76,6 @@ describe Manticoresearch::UtilsApi do
   end
 
   it "updates data in movies" do
-    config = Manticoresearch::Configuration.new("http://localhost:9308")
-    api_client = Manticoresearch::ApiClient.new(config)
-    utils_api = Manticoresearch::UtilsApi.new(api_client)
 
     sql_query = "UPDATE movies SET rating = 9.0 WHERE id = 1"
     response = utils_api.sql(sql_query)
@@ -102,9 +90,6 @@ describe Manticoresearch::UtilsApi do
   end
 
   it "deletes data from movies" do
-    config = Manticoresearch::Configuration.new("http://localhost:9308")
-    api_client = Manticoresearch::ApiClient.new(config)
-    utils_api = Manticoresearch::UtilsApi.new(api_client)
 
     sql_query = "DELETE FROM movies WHERE id = 1"
     response = utils_api.sql(sql_query, raw_response=true)
@@ -117,9 +102,6 @@ describe Manticoresearch::UtilsApi do
   end
 
   it "drops movies table" do
-    config = Manticoresearch::Configuration.new("http://localhost:9308")
-    api_client = Manticoresearch::ApiClient.new(config)
-    utils_api = Manticoresearch::UtilsApi.new(api_client)
 
     sql_query = "DROP TABLE movies"
     response = utils_api.sql(sql_query)
