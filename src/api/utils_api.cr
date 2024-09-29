@@ -39,6 +39,7 @@ module Manticoresearch
       header_content_type = @api_client.select_header_content_type(["text/plain"]) || "text/plain"
       header_params["Content-Type"] = header_content_type
 
+
       # 调用 API，传递 URL 编码的 body
       response = @api_client.call_api(
         "/sql", 
@@ -48,8 +49,8 @@ module Manticoresearch
         body: body_params
       )
 
-      # 输出响应信息调试
-      puts "Response: #{response}"
+      # # 输出响应信息调试
+      # puts "Response: #{response}"
 
       # 根据 raw_response 控制返回的格式
       return raw_response == false ? [response] : response

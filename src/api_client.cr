@@ -27,7 +27,7 @@ module Manticoresearch
       end
 
       # Set default User-Agent.
-      @default_headers["User-Agent"] = "manticoresearch/4.1.2/crystal"
+      @default_headers["User-Agent"] = "manticoresearch/1.0.3/crystal"
     end
 
     def close

@@ -54,6 +54,12 @@ module Manticoresearch
         full_url += "?" + query_string
       end
 
+      # puts "REST Request:"
+      # puts "Method: #{method}"
+      # puts "URL: #{full_url}"
+      # puts "Headers: #{headers}"
+      # puts "Body: #{body}"
+
       # Send request
       response = case method.upcase
                 when "GET"
@@ -71,18 +77,17 @@ module Manticoresearch
       # Handle the response
       rest_response = RESTResponse.new(response)
 
-      # todo delete
-      puts "REST Response:"
-      puts "Status: #{rest_response.status}"
-      puts "Reason: #{rest_response.reason}"
-      puts "Data: #{rest_response.data}"
-      puts "Headers: #{rest_response.headers}"
+      # puts "REST Response:"
+      # puts "Status: #{rest_response.status}"
+      # puts "Reason: #{rest_response.reason}"
+      # puts "Data: #{rest_response.data}"
+      # puts "Headers: #{rest_response.headers}"
       
       if rest_response.status < 200 || rest_response.status >= 300
         raise ApiException.new(http_resp: response)
       end
 
-      puts "success"
+      # puts "success"
 
       rest_response
     end
