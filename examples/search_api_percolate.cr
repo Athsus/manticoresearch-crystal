@@ -1,4 +1,4 @@
-require "../Manticoresearch/Manticoresearch"
+require "../manticoresearch"
 require "json"
 
 # 配置 Manticoresearch 客户端的主机地址

@@ -1,5 +1,4 @@
-require "../Manticoresearch/Manticoresearch"
-
+require "../manticoresearch"
 # 配置 Manticoresearch 客户端
 configuration = Manticoresearch::Configuration.new(
   host: "http://127.0.0.1:9308" # Manticoresearch 服务地址

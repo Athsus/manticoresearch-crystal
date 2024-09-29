@@ -1,5 +1,5 @@
 # 引入 Manticoresearch 库
-require "../Manticoresearch/Manticoresearch"
+require "../manticoresearch"
 
 # 引入 JSON 库用于处理 JSON 数据
 require "json"

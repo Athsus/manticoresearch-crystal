@@ -1,5 +1,5 @@
 # 引入 Manticoresearch 库
-require "../Manticoresearch/Manticoresearch"
+require "../manticoresearch"
 
 # 配置 Manticoresearch 客户端
 configuration = Manticoresearch::Configuration.new
